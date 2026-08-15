@@ -1,5 +1,7 @@
 # Reverse Agent
 
+[![CI](https://github.com/AnonymoDGH/reverse-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/AnonymoDGH/reverse-agent/actions/workflows/ci.yml)
+
 Agente de programación para la terminal, multi-proveedor y con identidad propia.
 Nació como una reconstrucción completa del CLI de Claude Code (más de 2.100
 archivos en `src/`), pero hoy es un producto distinto:
@@ -78,7 +80,9 @@ OPENAI_COMPATIBLE_BASE_URL=http://localhost:11434/v1 QWEN_MODEL=local/llama3.1 n
 ```
 
 También puedes cambiar de modelo dentro de la TUI con `/model`: el picker
-lista los modelos Qwen y los de cada proveedor configurado.
+lista los modelos Qwen y los de cada proveedor configurado. El comando
+`/providers` muestra el estado de cada proveedor (activo, prefijo y modelos
+destacados).
 
 Cualquier modelo pedido sin prefijo que no sea Qwen se envía al primer
 proveedor configurado; si no hay ninguno, se usa qwen-reverse.
