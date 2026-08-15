@@ -1,24 +1,16 @@
-# Qwen Code — reconstrucción completa en TypeScript
+# Reverse Agent
 
-Este proyecto contiene el árbol completo recuperado del CLI (más de 2.100 archivos en `src/`) y lo ejecuta con **Qwen** mediante [`qwen-reverse`](https://pypi.org/project/qwen-reverse/). No es la implementación reducida creada inicialmente: el agente, REPL, herramientas, permisos, MCP, memoria, hooks, plugins, tareas y UI originales están nuevamente en `src/`.
+Agente de programación para la terminal, multi-proveedor y con identidad propia.
+Nació como una reconstrucción completa del CLI de Claude Code (más de 2.100
+archivos en `src/`), pero hoy es un producto distinto:
 
-## Cambios realizados
-
-- Se recuperaron los módulos que no estaban presentes en el ZIP original usando la reconstrucción compilable compatible con el mismo snapshot.
-- Se añadió la configuración de compilación completa para Bun y las dependencias del árbol original.
-- `src/entry.ts` restaura el punto de entrada que faltaba en el source map e invoca `main()`.
-- `src/services/api/qwenReverse.ts` centraliza URL, modelo y activación de Qwen.
-- `src/services/api/client.ts` usa `qwen-reverse` en lugar de autenticación y servidores Anthropic.
-- `src/utils/model/model.ts` selecciona modelos Qwen por defecto.
-- `qwen_bridge.py` corrige incompatibilidades de `qwen-reverse 0.1.4` con:
-  - system prompts estructurados;
-  - streaming Anthropic SSE;
-  - bloques `tool_use` y `tool_result`;
-  - llamadas de herramientas seguidas por texto adicional;
-  - conteo aproximado de tokens.
-- `scripts/qwen-run.mjs` inicia y detiene automáticamente el backend Python.
-
-El snapshot incompleto recibido se conserva en `original-incomplete-src/` y el primer prototipo reducido en `rewrite-prototype/`; ninguno participa en la compilación.
+- **Marca propia:** Reverse Agent, paleta cian/violeta y la mascota *Wisp*.
+- **Backend principal:** [`qwen-reverse`](https://pypi.org/project/qwen-reverse/)
+  a través de un puente local Anthropic-compatible (`qwen_bridge.py`).
+- **Más proveedores:** OpenCode Zen, OpenRouter, Groq, DeepSeek y cualquier
+  endpoint OpenAI-compatible local (Ollama, LM Studio, vLLM).
+- **TUI completa:** herramientas, permisos, MCP, memoria, hooks, plugins,
+  tareas, sesiones, modo plan, subagentes y pantalla completa.
 
 ## Requisitos
 
@@ -29,36 +21,69 @@ Bun se instala localmente como dependencia del proyecto.
 
 ## Inicio automático — un solo comando
 
-Con Node.js 20+ y Python 3.10+ instalados, descomprime el proyecto y ejecuta:
-
 ```bash
 npm start
 ```
 
-El comando instala automáticamente dependencias, Bun y `qwen-reverse`, crea el entorno Python, inicia el backend y abre la TUI. Consulta [`INICIO_RAPIDO.md`](INICIO_RAPIDO.md) para Windows, macOS y Linux.
+El comando instala dependencias, Bun y `qwen-reverse`, crea el entorno
+Python, inicia el bridge y abre la TUI. Consulta
+[`INICIO_RAPIDO.md`](INICIO_RAPIDO.md) para Windows, macOS y Linux.
 
 ## Uso después de la primera instalación
 
 Modo interactivo rápido:
 
 ```bash
-npm run qwen
+npm run agent
 ```
 
 Una tarea y salida:
 
 ```bash
-npm run qwen -- --print "revisa este proyecto y corrige los tests" \
+npm run agent -- --print "revisa este proyecto y corrige los tests" \
   --output-format text --bare --dangerously-skip-permissions
 ```
 
-Cambiar modelo:
+## Proveedores
+
+El bridge (`qwen_bridge.py`) expone `/v1/messages` en formato Anthropic y
+rutea cada request al proveedor según el prefijo del modelo:
+
+| Prefijo        | Proveedor            | Activación                                  |
+| -------------- | -------------------- | ------------------------------------------- |
+| *(ninguno)*    | qwen-reverse (web)   | siempre activo (backend principal)          |
+| `opencode/`    | OpenCode Zen         | `ZEN_API_KEY` (o key local de opencode)     |
+| `openrouter/`  | OpenRouter           | `OPENROUTER_API_KEY`                        |
+| `groq/`        | Groq                 | `GROQ_API_KEY`                              |
+| `deepseek/`    | DeepSeek             | `DEEPSEEK_API_KEY`                          |
+| `local/`       | OpenAI-compatible    | `OPENAI_COMPATIBLE_BASE_URL` (Ollama, etc.) |
+
+Ejemplos:
 
 ```bash
-QWEN_MODEL=qwen3.8-max npm run qwen
+# Qwen (por defecto)
+QWEN_MODEL=qwen3.8-max npm run agent
+
+# OpenRouter
+OPENROUTER_API_KEY=sk-or-... QWEN_MODEL=openrouter/anthropic/claude-sonnet-4.5 npm run agent
+
+# Groq
+GROQ_API_KEY=gsk_... QWEN_MODEL=groq/llama-3.3-70b-versatile npm run agent
+
+# DeepSeek
+DEEPSEEK_API_KEY=sk-... QWEN_MODEL=deepseek/deepseek-reasoner npm run agent
+
+# Ollama local
+OPENAI_COMPATIBLE_BASE_URL=http://localhost:11434/v1 QWEN_MODEL=local/llama3.1 npm run agent
 ```
 
-Configuración disponible:
+También puedes cambiar de modelo dentro de la TUI con `/model`: el picker
+lista los modelos Qwen y los de cada proveedor configurado.
+
+Cualquier modelo pedido sin prefijo que no sea Qwen se envía al primer
+proveedor configurado; si no hay ninguno, se usa qwen-reverse.
+
+## Configuración
 
 ```env
 QWEN_REVERSE=1
@@ -68,16 +93,29 @@ QWEN_TOKEN=
 ```
 
 `QWEN_TOKEN` es opcional; `qwen-reverse` admite funcionamiento anónimo.
+El resto de variables de proveedores está en `.env.example`.
 
 ## Compilación y pruebas
 
 ```bash
 npm run build
-npm run test:qwen-bridge
+npm run test:bridge
 ```
 
-La compilación genera `dist/entry.js` y su mapa de fuentes. Se verificó también manualmente el flujo completo: CLI TypeScript → puente Anthropic → qwen-reverse → Qwen → llamada de herramienta → escritura local → respuesta final.
+La compilación genera `dist/entry.js` y su mapa de fuentes. El flujo completo
+verificado: CLI TypeScript → puente Anthropic → proveedor → llamada de
+herramienta → escritura local → respuesta final.
+
+## Identidad visual
+
+- Paleta de marca: cian (`#22d3ee`) + violeta (`#a78bfa`) + fucsia para bordes de shell.
+- Mascota: **Wisp**, un fantasma del espacio profundo (reemplaza al clon del
+  logo original en bienvenida, logo condensado y animaciones).
+- Seis temas recalculados: dark, light, dark/light daltonizados y dark/light ANSI.
 
 ## Aviso
 
-`qwen-reverse` utiliza endpoints web no oficiales de Qwen. Puede dejar de funcionar si el servicio cambia y puede estar sujeto a límites o bloqueos. Úsalo conforme a los términos aplicables.
+`qwen-reverse` utiliza endpoints web no oficiales de Qwen. Puede dejar de
+funcionar si el servicio cambia y puede estar sujeto a límites o bloqueos.
+Úsalo conforme a los términos aplicables. Los proveedores de API requieren sus
+propias claves y términos.
