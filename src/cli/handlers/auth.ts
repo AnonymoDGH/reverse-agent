@@ -287,7 +287,7 @@ export async function authStatus(opts: {
     }
     if (!loggedIn) {
       process.stdout.write(
-        'Not logged in. Run claude auth login to authenticate.\n',
+        'Not logged in. Run reverse-agent auth login to authenticate.\n',
       )
     }
   } else {

@@ -1486,7 +1486,7 @@ export async function removeInstalledSymlink(): Promise<void> {
 }
 
 /**
- * Clean up old claude aliases from shell configuration files
+ * Clean up old reverse-agent aliases from shell configuration files
  * Only handles alias removal, not PATH setup
  */
 export async function cleanupShellAliases(): Promise<SetupMessage[]> {
@@ -1503,11 +1503,11 @@ export async function cleanupShellAliases(): Promise<SetupMessage[]> {
       if (hadAlias) {
         await writeFileLines(configFile, filtered)
         messages.push({
-          message: `Removed claude alias from ${configFile}. Run: unalias claude`,
+          message: `Removed reverse-agent alias from ${configFile}. Run: unalias claude`,
           userActionRequired: true,
           type: 'alias',
         })
-        logForDebugging(`Cleaned up claude alias from ${shellType} config`)
+        logForDebugging(`Cleaned up reverse-agent alias from ${shellType} config`)
       }
     } catch (error) {
       logError(error)

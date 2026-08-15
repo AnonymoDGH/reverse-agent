@@ -1678,7 +1678,7 @@ async function* queryLoop(
     // Each time we have tool results and are about to recurse, that's a turn
     const nextTurnCount = turnCount + 1
 
-    // Periodic task summary for `claude ps` — fires mid-turn so a
+    // Periodic task summary for `reverse-agent ps` — fires mid-turn so a
     // long-running agent still refreshes what it's working on. Gated
     // only on !agentId so every top-level conversation (REPL, SDK, HFI,
     // remote) generates summaries; subagents/forks don't.

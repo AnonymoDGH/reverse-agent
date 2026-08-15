@@ -73,7 +73,7 @@ export type LoadedFrom =
   | 'mcp'
 
 /**
- * Returns a claude config directory path for a given source.
+ * Returns a reverse-agent config directory path for a given source.
  */
 export function getSkillsPath(
   source: SettingSource | 'plugin',

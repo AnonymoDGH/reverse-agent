@@ -182,7 +182,7 @@ export function getIdpClientSecret(idpIssuer: string): string | undefined {
 
 /**
  * Remove the IdP client secret for the given issuer from secure storage.
- * Used by `claude mcp xaa clear`.
+ * Used by `reverse-agent mcp xaa clear`.
  */
 export function clearIdpClientSecret(idpIssuer: string): void {
   const storage = getSecureStorage()

@@ -87,7 +87,7 @@ export type LastPromptMessage = {
 /**
  * Periodic fork-generated summary of what the agent is currently doing.
  * Written every min(5 steps, 2min) by forking the main thread mid-turn so
- * `claude ps` can show something more useful than the last user prompt
+ * `reverse-agent ps` can show something more useful than the last user prompt
  * (which is often "ok go" or "fix it").
  */
 export type TaskSummaryMessage = {

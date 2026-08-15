@@ -16,7 +16,7 @@ import {
 /**
  * Fields that belong in marketplace.json entries (PluginMarketplaceEntrySchema)
  * but not plugin.json (PluginManifestSchema). Plugin authors reasonably copy
- * one into the other. Surfaced as warnings by `claude plugin validate` since
+ * one into the other. Surfaced as warnings by `reverse-agent plugin validate` since
  * they're a known confusion point — the load path silently strips all unknown
  * keys via zod's default behavior, so they're harmless at runtime but worth
  * flagging to authors.
@@ -213,7 +213,7 @@ export async function validatePluginManifest(
   }
 
   // Surface marketplace-only fields as a warning BEFORE validation flags
-  // them. `claude plugin validate` is a developer tool — authors running it
+  // them. `reverse-agent plugin validate` is a developer tool — authors running it
   // want to know these fields don't belong here. But it's a warning, not an
   // error: the plugin loads fine at runtime (the base schema strips unknown
   // keys). We strip them here so the .strict() call below doesn't double-
@@ -510,7 +510,7 @@ export async function validateMarketplaceManifest(
  *
  * The runtime loader (parseFrontmatter) silently drops unparseable YAML to a
  * debug log and returns an empty object. That's the right resilience choice
- * for the load path, but authors running `claude plugin validate` want a hard
+ * for the load path, but authors running `reverse-agent plugin validate` want a hard
  * signal. This re-parses the frontmatter block and surfaces what the loader
  * would silently swallow.
  */

@@ -49,7 +49,7 @@ export function isBgSession(): boolean {
  * Write a PID file for this session and register cleanup.
  *
  * Registers all top-level sessions — interactive CLI, SDK (vscode, desktop,
- * typescript, python, -p), bg/daemon spawns — so `claude ps` sees everything
+ * typescript, python, -p), bg/daemon spawns — so `reverse-agent ps` sees everything
  * the user might be running. Skips only teammates/subagents, which would
  * conflate swarm usage with genuine concurrency and pollute ps with noise.
  *
@@ -96,7 +96,7 @@ export async function registerSession(): Promise<boolean> {
       }),
     )
     // --resume / /resume mutates getSessionId() via switchSession. Without
-    // this, the PID file's sessionId goes stale and `claude ps` sparkline
+    // this, the PID file's sessionId goes stale and `reverse-agent ps` sparkline
     // reads the wrong transcript.
     onSessionSwitch(id => {
       void updatePidFile({ sessionId: id })
@@ -148,7 +148,7 @@ export async function updateSessionBridgeId(
 }
 
 /**
- * Push live activity state for `claude ps`. Fire-and-forget from REPL's
+ * Push live activity state for `reverse-agent ps`. Fire-and-forget from REPL's
  * status-change effect — a dropped write just means ps falls back to
  * transcript-tail derivation for one refresh.
  */

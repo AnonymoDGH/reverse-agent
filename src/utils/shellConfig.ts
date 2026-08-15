@@ -1,6 +1,6 @@
 /**
  * Utilities for managing shell configuration files (like .bashrc, .zshrc)
- * Used for managing claude aliases and PATH entries
+ * Used for managing reverse-agent aliases and PATH entries
  */
 
 import { open, readFile, stat } from 'fs/promises'
@@ -37,7 +37,7 @@ export function getShellConfigPaths(
 }
 
 /**
- * Filter out installer-created claude aliases from an array of lines
+ * Filter out installer-created reverse-agent aliases from an array of lines
  * Only removes aliases pointing to $HOME/.claude/local/claude
  * Preserves custom user aliases that point to other locations
  * Returns the filtered lines and whether our default installer alias was found
@@ -48,7 +48,7 @@ export function filterClaudeAliases(lines: string[]): {
 } {
   let hadAlias = false
   const filtered = lines.filter(line => {
-    // Check if this is a claude alias
+    // Check if this is a reverse-agent alias
     if (CLAUDE_ALIAS_REGEX.test(line)) {
       // Extract the alias target - handle spaces, quotes, and various formats
       // First try with quotes
@@ -107,7 +107,7 @@ export async function writeFileLines(
 }
 
 /**
- * Check if a claude alias exists in any shell config file
+ * Check if a reverse-agent alias exists in any shell config file
  * Returns the alias target if found, null otherwise
  * @param options Optional overrides for testing (env, homedir)
  */
@@ -135,7 +135,7 @@ export async function findClaudeAlias(
 }
 
 /**
- * Check if a claude alias exists and points to a valid executable
+ * Check if a reverse-agent alias exists and points to a valid executable
  * Returns the alias target if valid, null otherwise
  * @param options Optional overrides for testing (env, homedir)
  */

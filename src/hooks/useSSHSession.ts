@@ -1,5 +1,5 @@
 /**
- * REPL integration hook for `claude ssh` sessions.
+ * REPL integration hook for `reverse-agent ssh` sessions.
  *
  * Sibling to useDirectConnect — same shape (isRemoteMode/sendMessage/
  * cancelRequest/disconnect), same REPL wiring, but drives an SSH child
