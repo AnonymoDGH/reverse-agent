@@ -330,7 +330,7 @@ class ZenProviderTests(unittest.TestCase):
         self.assertEqual(msgs[2]["role"], "user")
         self.assertEqual(msgs[2]["content"], "sigue")
 
-    def test_zen_chat_arguments_includes_tools_and_model(self):
+    def test_provider_chat_arguments_includes_tools_and_model(self):
         import qwen_bridge as qb
         body = {
             "model": "opencode/deepseek-chat",
@@ -338,19 +338,32 @@ class ZenProviderTests(unittest.TestCase):
             "tools": [{"name": "Bash", "description": "d", "input_schema": {"type": "object"}}],
             "max_tokens": 200,
         }
-        payload = qb.zen_chat_arguments(body)
+        payload = qb.provider_chat_arguments(qb.get_provider("zen"), body)
         self.assertEqual(payload["model"], "deepseek-chat")
         self.assertEqual(payload["stream"], True)
         self.assertEqual(len(payload["tools"]), 1)
         self.assertEqual(payload["tools"][0]["function"]["name"], "Bash")
         self.assertEqual(payload["max_tokens"], 200)
 
-    def test_stream_zen_payload_is_openai_compatible(self):
+    def test_stream_provider_payload_is_openai_compatible(self):
         import qwen_bridge as qb
         body = {"model": "opencode/gpt-5.5-pro", "messages": [{"role": "user", "content": "hi"}]}
-        payload = qb.zen_chat_arguments(body)
+        payload = qb.provider_chat_arguments(qb.get_provider("zen"), body)
         self.assertNotIn("tools", payload)  # sin tools en el body -> no forge tools vacíos
         self.assertEqual(payload["messages"][0]["role"], "user")
+
+    def test_provider_registry_routes_by_prefix(self):
+        import qwen_bridge as qb
+        self.assertEqual(qb.provider_for({"model": "openrouter/anthropic/claude-sonnet-4.5"})[0], "openrouter")
+        self.assertEqual(qb.provider_for({"model": "groq/llama-3.3-70b-versatile"})[0], "groq")
+        self.assertEqual(qb.provider_for({"model": "deepseek/deepseek-chat"})[0], "deepseek")
+        self.assertEqual(qb.provider_for({"model": "local/llama3"})[0], "local")
+        self.assertEqual(qb.provider_for({"model": "qwen3.8-max"})[0], "qwen")
+
+    def test_provider_registry_strips_prefix(self):
+        import qwen_bridge as qb
+        self.assertEqual(qb.provider_for({"model": "openrouter/anthropic/claude-sonnet-4.5"})[1], "anthropic/claude-sonnet-4.5")
+        self.assertEqual(qb.provider_for({"model": "groq/llama-3.3-70b-versatile"})[1], "llama-3.3-70b-versatile")
 
 
 if __name__ == '__main__': unittest.main()

@@ -257,14 +257,66 @@ def model_name(body: dict[str, Any]) -> str:
     return os.getenv("QWEN_MODEL", "qwen3.8-max-thinking").removesuffix("-thinking")
 
 
-ZEN_BASE_URL = os.getenv("ZEN_BASE_URL", "https://opencode.ai/zen/v1")
+# ---------------------------------------------------------------------------
+# Registro de proveedores OpenAI-compatibles detrás del bridge.
+# qwen-reverse sigue siendo el backend principal; estos proveedores amplían el
+# catálogo de modelos. Cada uno se activa con su API key (o prefijo de modelo).
+# ---------------------------------------------------------------------------
 
 
-def zen_api_key() -> str | None:
-    """Key de OpenCode Zen: env ZEN_API_KEY, o la key guardada de opencode local."""
-    key = os.getenv("ZEN_API_KEY") or os.getenv("OPEN_CODE_API_KEY")
-    if key:
-        return key
+class Provider:
+    """Un backend OpenAI-compatible (chat completions) detrás del bridge."""
+
+    def __init__(
+        self,
+        provider_id: str,
+        display: str,
+        prefix: str,
+        key_envs: list[str],
+        base_env: str,
+        default_base: str,
+        default_models: list[str],
+        extra_headers: dict[str, str] | None = None,
+        key_loader=None,
+        reasoning_effort: bool = False,
+        fetch_live_models: bool = False,
+    ) -> None:
+        self.id = provider_id
+        self.display = display
+        self.prefix = prefix
+        self.key_envs = key_envs
+        self.base_env = base_env
+        self.default_base = default_base
+        self.default_models = list(default_models)
+        self.extra_headers = extra_headers or {}
+        self._key_loader = key_loader
+        self.reasoning_effort = reasoning_effort
+        self.fetch_live_models = fetch_live_models
+
+    def api_key(self) -> str | None:
+        for env_name in self.key_envs:
+            value = os.getenv(env_name)
+            if value:
+                return value
+        if self._key_loader is not None:
+            return self._key_loader()
+        return None
+
+    def base_url(self) -> str:
+        return (os.getenv(self.base_env) or self.default_base).rstrip("/")
+
+    def configured(self) -> bool:
+        # El proveedor local puede funcionar sin key (Ollama, LM Studio, vLLM).
+        if self.id == "local":
+            return bool(os.getenv(self.base_env))
+        return self.api_key() is not None
+
+    def requires_key(self) -> bool:
+        return self.id != "local"
+
+
+def _opencode_key_from_disk() -> str | None:
+    """Key guardada de opencode local (~/.local/share/opencode/auth.json)."""
     candidates = [
         os.path.expanduser("~/.local/share/opencode/auth.json"),
         os.path.expandvars("%USERPROFILE%\\.local\\share\\opencode\\auth.json"),
@@ -281,25 +333,123 @@ def zen_api_key() -> str | None:
     return None
 
 
+KNOWN_ZEN_MODELS = [
+    "claude-fable-5", "claude-opus-5", "claude-sonnet-5", "claude-sonnet-4-6",
+    "claude-opus-4-6", "claude-haiku-4-5", "gpt-5.6-sol", "gpt-5.5-pro", "gpt-5.4",
+    "gpt-5.3-codex", "gpt-5.2-codex", "gpt-5.1-codex", "deepseek-v4-pro", "deepseek-v4-flash",
+    "gemini-3.6-flash", "gemini-3.1-pro", "glm-5.2", "kimi-k3", "minimax-m3", "grok-4.5",
+    "qwen3.6-plus", "deepseek-v4-flash-free",
+]
+
+KNOWN_OPENROUTER_MODELS = [
+    "openrouter/auto",
+    "anthropic/claude-sonnet-4.5",
+    "openai/gpt-5.2",
+    "google/gemini-3-pro",
+    "deepseek/deepseek-v3.2",
+    "x-ai/grok-4",
+    "meta-llama/llama-4-maverick",
+    "qwen/qwen3-coder",
+    "moonshotai/kimi-k2",
+    "mistralai/mistral-large",
+]
+
+KNOWN_GROQ_MODELS = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "openai/gpt-oss-120b",
+    "deepseek-r1-distill-llama-70b",
+    "qwen/qwen3-32b",
+]
+
+KNOWN_DEEPSEEK_MODELS = [
+    "deepseek-chat",
+    "deepseek-reasoner",
+]
+
+PROVIDERS: list[Provider] = [
+    Provider(
+        "zen", "OpenCode Zen", "opencode/",
+        ["ZEN_API_KEY", "OPEN_CODE_API_KEY"], "ZEN_BASE_URL",
+        "https://opencode.ai/zen/v1", KNOWN_ZEN_MODELS,
+        key_loader=_opencode_key_from_disk,
+        reasoning_effort=True,
+        fetch_live_models=True,
+    ),
+    Provider(
+        "openrouter", "OpenRouter", "openrouter/",
+        ["OPENROUTER_API_KEY"], "OPENROUTER_BASE_URL",
+        "https://openrouter.ai/api/v1", KNOWN_OPENROUTER_MODELS,
+        extra_headers={
+            "HTTP-Referer": "https://github.com/reverse-agent",
+            "X-Title": "Reverse Agent",
+        },
+    ),
+    Provider(
+        "groq", "Groq", "groq/",
+        ["GROQ_API_KEY"], "GROQ_BASE_URL",
+        "https://groq.com/openai/v1", KNOWN_GROQ_MODELS,
+        fetch_live_models=True,
+    ),
+    Provider(
+        "deepseek", "DeepSeek", "deepseek/",
+        ["DEEPSEEK_API_KEY"], "DEEPSEEK_BASE_URL",
+        "https://api.deepseek.com/v1", KNOWN_DEEPSEEK_MODELS,
+        fetch_live_models=True,
+    ),
+    Provider(
+        "local", "OpenAI-compatible local", "local/",
+        ["OPENAI_COMPATIBLE_API_KEY", "OPENAI_API_KEY"], "OPENAI_COMPATIBLE_BASE_URL",
+        "http://localhost:11434/v1", [],
+        fetch_live_models=True,
+    ),
+]
+
+PROVIDER_MAP = {provider.id: provider for provider in PROVIDERS}
+
+
+def get_provider(provider_id: str) -> Provider:
+    return PROVIDER_MAP[provider_id]
+
+
+def zen_api_key() -> str | None:
+    """Compatibilidad hacia atrás: key del proveedor OpenCode Zen."""
+    return get_provider("zen").api_key()
+
+
 def provider_for(body: dict[str, Any]) -> tuple[str, str]:
     """Decide backend y modelo efectivo.
 
-    Reglas:
-    - modelo pedido o QWEN_MODEL con prefijo "opencode/" -> OpenCode Zen.
-    - cualquier modelo pedido que no sea qwen (p.ej. claude-*, gpt-*, deepseek-*)
-      -> Zen si hay key disponible.
-    - resto -> qwen web.
+    Reglas (en orden):
+    1. modelo pedido o QWEN_MODEL con prefijo de proveedor
+       ("opencode/", "openrouter/", "groq/", "deepseek/", "local/") -> ese proveedor.
+    2. modelo pedido que no sea qwen y conocido por un proveedor configurado -> ese.
+    3. modelo pedido que no sea qwen (o sin modelo) con algún proveedor
+       configurado -> el primer proveedor configurado.
+    4. resto -> qwen-reverse (backend principal).
     """
     requested = str(body.get("model") or "")
     env_model = os.getenv("QWEN_MODEL", "qwen3.8-max-thinking")
-    if requested.startswith("opencode/"):
-        return "zen", requested.removeprefix("opencode/")
-    if env_model.startswith("opencode/"):
-        return "zen", env_model.removeprefix("opencode/")
-    if requested and not requested.startswith("qwen") and zen_api_key():
-        return "zen", requested
-    if not requested.startswith("qwen") and zen_api_key():
-        return "zen", env_model.removesuffix("-thinking")
+    for provider in PROVIDERS:
+        if requested.startswith(provider.prefix):
+            return provider.id, requested.removeprefix(provider.prefix)
+    for provider in PROVIDERS:
+        if env_model.startswith(provider.prefix):
+            return provider.id, env_model.removeprefix(provider.prefix)
+    if requested and not requested.startswith("qwen"):
+        known = next(
+            (p for p in PROVIDERS if p.configured() and requested in p.default_models),
+            None,
+        )
+        if known is not None:
+            return known.id, requested
+        fallback = next((p for p in PROVIDERS if p.configured()), None)
+        if fallback is not None:
+            return fallback.id, requested
+    if not requested.startswith("qwen") and not env_model.startswith("qwen"):
+        fallback = next((p for p in PROVIDERS if p.configured()), None)
+        if fallback is not None:
+            return fallback.id, env_model.removesuffix("-thinking")
     return "qwen", model_name(body)
 
 
@@ -568,8 +718,8 @@ def zen_messages(body: dict[str, Any]) -> list[dict[str, Any]]:
     return messages
 
 
-def zen_chat_arguments(body: dict[str, Any]) -> dict[str, Any]:
-    provider, model = provider_for(body)
+def provider_chat_arguments(provider: Provider, body: dict[str, Any]) -> dict[str, Any]:
+    _, model = provider_for(body)
     payload: dict[str, Any] = {
         "model": model,
         "messages": zen_messages(body),
@@ -580,26 +730,27 @@ def zen_chat_arguments(body: dict[str, Any]) -> dict[str, Any]:
         payload["tools"] = tools
     if isinstance(body.get("max_tokens"), int):
         payload["max_tokens"] = body["max_tokens"]
-    effort = extract_reasoning_effort(body)
-    if effort and effort != "none":
-        payload["reasoning_effort"] = effort
+    if provider.reasoning_effort:
+        effort = extract_reasoning_effort(body)
+        if effort and effort != "none":
+            payload["reasoning_effort"] = effort
     return payload
 
 
-async def live_zen_anthropic_stream(body: dict[str, Any]):
-    """Traduce un stream de chat completions de OpenCode Zen a SSE Anthropic."""
+async def live_provider_anthropic_stream(provider: Provider, body: dict[str, Any]):
+    """Traduce un stream de chat completions de un proveedor a SSE Anthropic."""
     import aiohttp
-    key = zen_api_key()
-    if not key:
+    key = provider.api_key()
+    if provider.requires_key() and not key:
         yield sse("error", {"type": "error", "error": {
             "type": "authentication_error",
-            "message": "Falta la API key de OpenCode Zen. Configurá ZEN_API_KEY (o tené la key "
-                       "de opencode en ~/.local/share/opencode/auth.json).",
+            "message": f"Falta la API key de {provider.display}. "
+                       f"Configurá {provider.key_envs[0]}.",
         }})
         return
-    _, zen_model = provider_for(body)
-    payload = zen_chat_arguments(body)
-    display_model = str(body.get("model") or zen_model)
+    _, effective_model = provider_for(body)
+    payload = provider_chat_arguments(provider, body)
+    display_model = str(body.get("model") or effective_model)
     message_id = f"msg_{uuid.uuid4().hex}"
     yield sse("message_start", {"type": "message_start", "message": {
         "id": message_id, "type": "message", "role": "assistant",
@@ -612,16 +763,18 @@ async def live_zen_anthropic_stream(body: dict[str, Any]):
     usage = {"input_tokens": 0, "output_tokens": 0}
     has_received_data = False
     pending_tools: dict[int, dict[str, Any]] = {}
-    headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    headers = {"Content-Type": "application/json", **provider.extra_headers}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.post(f"{ZEN_BASE_URL}/chat/completions", json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=600)) as resp:
+            async with session.post(f"{provider.base_url()}/chat/completions", json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=600)) as resp:
                 if resp.status not in (200, 201):
                     error_text = (await resp.text())[:500]
                     kind = "authentication_error" if resp.status == 401 else "rate_limit_error" if resp.status == 429 else "api_error"
                     yield sse("error", {"type": "error", "error": {
                         "type": kind,
-                        "message": f"OpenCode Zen {resp.status}: {error_text or 'sin detalle'}",
+                        "message": f"{provider.display} {resp.status}: {error_text or 'sin detalle'}",
                     }})
                     return
                 async for raw in resp.content:
@@ -655,7 +808,7 @@ async def live_zen_anthropic_stream(body: dict[str, Any]):
                             has_received_data = True
                             if "thinking" not in open_blocks:
                                 open_blocks["thinking"] = index
-                                yield sse("content_block_start", {"type": "content_block_start", "index": index, "content_block": {"type": "thinking", "thinking": "", "signature": "opencode-zen"}})
+                                yield sse("content_block_start", {"type": "content_block_start", "index": index, "content_block": {"type": "thinking", "thinking": "", "signature": provider.id}})
                                 index += 1
                             yield sse("content_block_delta", {"type": "content_block_delta", "index": open_blocks["thinking"], "delta": {"type": "thinking_delta", "thinking": reasoning}})
                         if text_delta:
@@ -705,13 +858,13 @@ async def live_zen_anthropic_stream(body: dict[str, Any]):
                 print("[qwen-bridge zen traceback]\n" + traceback.format_exc(), file=sys.stderr, flush=True)
             yield sse("error", {"type": "error", "error": {
                 "type": "api_error",
-                "message": f"OpenCode Zen Engine Error: {exc}",
+                "message": f"{provider.display} Engine Error: {exc}",
             }})
             return
 
     if not has_received_data and not pending_tools:
         yield sse("error", {"type": "error", "error": {
-            "type": "api_error", "message": "OpenCode Zen devolvió una respuesta vacía.",
+            "type": "api_error", "message": f"{provider.display} devolvió una respuesta vacía.",
         }})
         return
     for block_index in open_blocks.values():
@@ -926,36 +1079,38 @@ async def live_anthropic_stream(body: dict[str, Any]):
     yield sse("message_stop", {"type": "message_stop"})
 
 
-async def zen_anthropic_response(body: dict[str, Any]) -> dict[str, Any]:
-    """Una llamada no-stream a OpenCode Zen, traducida a respuesta Anthropic."""
+async def provider_anthropic_response(provider: Provider, body: dict[str, Any]) -> dict[str, Any]:
+    """Una llamada no-stream a un proveedor, traducida a respuesta Anthropic."""
     import aiohttp
-    key = zen_api_key()
-    if not key:
+    key = provider.api_key()
+    if provider.requires_key() and not key:
         return {"type": "error", "error": {
             "type": "authentication_error",
-            "message": "Falta la API key de OpenCode Zen. Configurá ZEN_API_KEY (o tené la key "
-                       "de opencode en ~/.local/share/opencode/auth.json).",
+            "message": f"Falta la API key de {provider.display}. "
+                       f"Configurá {provider.key_envs[0]}.",
         }}
-    _, zen_model = provider_for(body)
-    payload = zen_chat_arguments(body)
+    _, effective_model = provider_for(body)
+    payload = provider_chat_arguments(provider, body)
     payload["stream"] = False
-    headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    headers = {"Content-Type": "application/json", **provider.extra_headers}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
     async with aiohttp.ClientSession() as session:
-        async with session.post(f"{ZEN_BASE_URL}/chat/completions", json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=600)) as resp:
+        async with session.post(f"{provider.base_url()}/chat/completions", json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=600)) as resp:
             if resp.status not in (200, 201):
                 error_text = (await resp.text())[:500]
                 if resp.status == 401:
-                    raise QwenAuthError(f"OpenCode Zen auth: {error_text or 'sin detalle'}")
+                    raise QwenAuthError(f"{provider.display} auth: {error_text or 'sin detalle'}")
                 if resp.status == 429:
-                    raise QwenRateLimitError(f"OpenCode Zen rate limit: {error_text or 'sin detalle'}")
-                raise QwenError(f"OpenCode Zen {resp.status}: {error_text or 'sin detalle'}")
+                    raise QwenRateLimitError(f"{provider.display} rate limit: {error_text or 'sin detalle'}")
+                raise QwenError(f"{provider.display} {resp.status}: {error_text or 'sin detalle'}")
             data = await resp.json()
     choice = (data.get("choices") or [{}])[0]
     message = choice.get("message") or {}
     blocks: list[dict[str, Any]] = []
     reasoning = message.get("reasoning_content")
     if reasoning:
-        blocks.append({"type": "thinking", "thinking": str(reasoning), "signature": "opencode-zen"})
+        blocks.append({"type": "thinking", "thinking": str(reasoning), "signature": provider.id})
     text = message.get("content")
     if text:
         blocks.append({"type": "text", "text": text})
@@ -973,7 +1128,7 @@ async def zen_anthropic_response(body: dict[str, Any]) -> dict[str, Any]:
     }
     return {
         "id": f"msg_{uuid.uuid4().hex}", "type": "message", "role": "assistant",
-        "model": str(body.get("model") or zen_model), "content": blocks,
+        "model": str(body.get("model") or effective_model), "content": blocks,
         "stop_reason": "tool_use" if (message.get("tool_calls")) else "end_turn",
         "stop_sequence": None, "usage": usage,
     }
@@ -1001,12 +1156,13 @@ async def messages(request: Request):
         tools = body.get("tools") or []
         print(f"[qwen-bridge tools] count={len(tools)} first_types={[type(t).__name__ for t in tools[:3]]}", flush=True)
 
-    provider, _ = provider_for(body)
-    if provider == "zen":
+    provider_id, _ = provider_for(body)
+    if provider_id != "qwen":
+        provider = get_provider(provider_id)
         if body.get("stream"):
-            return StreamingResponse(live_zen_anthropic_stream(body), media_type="text/event-stream")
+            return StreamingResponse(live_provider_anthropic_stream(provider, body), media_type="text/event-stream")
         try:
-            return await zen_anthropic_response(body)
+            return await provider_anthropic_response(provider, body)
         except Exception as error:
             return error_response(error)
 
@@ -1055,24 +1211,18 @@ KNOWN_QWEN_MODELS = [
     "qwen3.6-plus", "qwen3-coder-plus", "qwen3.5-flash", "qwen3.5-plus", "qwen3-vl-plus",
 ]
 
-KNOWN_ZEN_MODELS = [
-    "claude-fable-5", "claude-opus-5", "claude-sonnet-5", "claude-sonnet-4-6",
-    "claude-opus-4-6", "claude-haiku-4-5", "gpt-5.6-sol", "gpt-5.5-pro", "gpt-5.4",
-    "gpt-5.3-codex", "gpt-5.2-codex", "gpt-5.1-codex", "deepseek-v4-pro", "deepseek-v4-flash",
-    "gemini-3.6-flash", "gemini-3.1-pro", "glm-5.2", "kimi-k3", "minimax-m3", "grok-4.5",
-    "qwen3.6-plus", "deepseek-v4-flash-free",
-]
-
-
-async def zen_model_list() -> list[str]:
+async def provider_model_list(provider: Provider) -> list[str]:
+    """Lista de modelos de un proveedor: en vivo si está configurado, si no la conocida."""
     import aiohttp
-    key = zen_api_key()
-    if not key:
-        return KNOWN_ZEN_MODELS
+    if not provider.fetch_live_models or not provider.configured():
+        return list(provider.default_models)
+    key = provider.api_key()
     try:
-        headers = {"Authorization": f"Bearer {key}"}
+        headers = {**provider.extra_headers}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"{ZEN_BASE_URL}/models", headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            async with session.get(f"{provider.base_url()}/models", headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     ids = [item.get("id") for item in (data.get("data") or []) if isinstance(item, dict) and item.get("id")]
@@ -1080,7 +1230,7 @@ async def zen_model_list() -> list[str]:
                         return ids
     except Exception:
         pass
-    return KNOWN_ZEN_MODELS
+    return list(provider.default_models)
 
 
 @app.get("/v1/models")
@@ -1091,16 +1241,16 @@ async def models():
         model_list.extend(found if found else KNOWN_QWEN_MODELS)
     except Exception:
         model_list.extend(KNOWN_QWEN_MODELS)
-    zen_models = await zen_model_list()
     seen = set(model_list)
-    for item in zen_models:
-        if item not in seen:
-            model_list.append(item)
-            seen.add(item)
+    for provider in PROVIDERS:
+        for item in await provider_model_list(provider):
+            if item not in seen:
+                model_list.append(item)
+                seen.add(item)
     return {
         "object": "list",
         "data": [
-            {"id": item, "object": "model", "created": int(time.time()), "owned_by": "qwen-reverse"}
+            {"id": item, "object": "model", "created": int(time.time()), "owned_by": "reverse-agent"}
             for item in model_list
         ],
     }
@@ -1108,11 +1258,11 @@ async def models():
 
 @app.get("/health")
 async def health():
-    provider = "zen" if zen_api_key() else "qwen-reverse"
+    configured = [p.id for p in PROVIDERS if p.configured()]
     return {
         "status": "ok",
-        "backend": "qwen-reverse" if provider == "qwen-reverse" else "opencode-zen",
-        "providers": ["qwen-reverse", "opencode-zen"] if provider == "zen" else ["qwen-reverse"],
+        "backend": "qwen-reverse",
+        "providers": ["qwen-reverse", *configured],
         "model": os.getenv("QWEN_MODEL", "qwen3.8-max"),
     }
 
