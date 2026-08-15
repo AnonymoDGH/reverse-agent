@@ -29,6 +29,7 @@ import { isModelAllowed } from './modelAllowlist.js'
 import { type ModelAlias, isModelAlias } from './aliases.js'
 import { capitalize } from '../stringUtils.js'
 import {
+  getProviderModelInfo,
   getQwenModelDisplayName,
   getQwenModelInfo,
   isKnownQwenModel,
@@ -454,6 +455,11 @@ export function getPublicModelName(model: ModelName): string {
   const publicName = getPublicModelDisplayName(model)
   if (isQwenReverseEnabled() || isKnownQwenModel(model)) {
     if (publicName) {
+      // Los modelos de proveedor (OpenRouter, Groq, ...) ya traen su nombre
+      // completo; solo los Qwen puros llevan el prefijo de marca.
+      if (getProviderModelInfo(model)) {
+        return publicName
+      }
       return publicName.startsWith('Qwen') ? publicName : `Qwen ${publicName}`
     }
     return `Qwen (${model})`

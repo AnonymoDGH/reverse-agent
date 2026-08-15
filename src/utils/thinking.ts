@@ -85,12 +85,16 @@ export function getRainbowColor(
   return colors[charIndex % colors.length]!
 }
 
-import { getQwenModelInfo, isQwenReverseEnabled } from '../services/api/qwenReverse.js'
+import { getProviderModelInfo, getQwenModelInfo, isQwenReverseEnabled } from '../services/api/qwenReverse.js'
 
 // TODO(inigo): add support for probing unknown models via API error detection
 // Provider-aware thinking support detection (aligns with modelSupportsISP in betas.ts)
 export function modelSupportsThinking(model: string): boolean {
   if (isQwenReverseEnabled() || model.toLowerCase().startsWith('qwen')) {
+    const providerInfo = getProviderModelInfo(model)
+    if (providerInfo) {
+      return providerInfo.thinking
+    }
     const info = getQwenModelInfo(model.toLowerCase())
     return info ? info.thinking : model.toLowerCase().includes('thinking') || model.toLowerCase().includes('max')
   }

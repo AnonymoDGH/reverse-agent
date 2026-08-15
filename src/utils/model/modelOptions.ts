@@ -33,6 +33,7 @@ import {
 import { has1mContext } from '../context.js'
 import { getGlobalConfig } from '../config.js'
 import {
+  PROVIDER_MODELS,
   QWEN_MODELS,
   isQwenReverseEnabled,
 } from '../../services/api/qwenReverse.js'
@@ -285,6 +286,12 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
     return [
       getDefaultOptionForUser(fastMode),
       ...QWEN_MODELS.map(m => ({
+        value: m.id,
+        label: m.displayName,
+        description: m.description,
+        descriptionForModel: `${m.displayName} (${m.id}) - ${m.description}`,
+      })),
+      ...PROVIDER_MODELS.map(m => ({
         value: m.id,
         label: m.displayName,
         description: m.description,
