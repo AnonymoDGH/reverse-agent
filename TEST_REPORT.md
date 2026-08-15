@@ -1,4 +1,4 @@
-# Informe de pruebas — Qwen Code completo
+# Informe de pruebas — Reverse Agent (antes Qwen Code)
 
 Fecha: 2026-08-06 (America/Bogota)
 
