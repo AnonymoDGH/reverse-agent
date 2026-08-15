@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.venv/
+
+# Build output
+dist/
+
+# Lockfiles managed by bun (npm lock kept)
+bun.lock
+bun.lockb
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Logs & local state
+*.log
+.log
+.probe_server_stderr.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local env
+.env

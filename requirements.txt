@@ -1,0 +1,4 @@
+qwen-reverse==0.1.4
+# qwen-reverse no declara esta dependencia, pero FastAPI la necesita al
+# importar su servidor y sus rutas multipart.
+python-multipart>=0.0.20
