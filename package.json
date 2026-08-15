@@ -4,6 +4,9 @@
   "description": "Reverse Agent — agente de programación multi-proveedor (backend principal: qwen-reverse)",
   "type": "module",
   "main": "src/entry.ts",
+  "bin": {
+    "reverse-agent": "scripts/reverse-run.mjs"
+  },
   "scripts": {
     "dev": "bun run src/entry.ts",
     "build": "bun build src/entry.ts --outdir=dist --target=bun --sourcemap",
