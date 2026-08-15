@@ -77,7 +77,7 @@ export function getAttributionTexts(): AttributionTexts {
       ? getPublicModelName(model)
       : defaultFallback
 
-  const appName = isQwenReverseEnabled() ? 'Reverse Agent' : 'Claude Code'
+  const appName = isQwenReverseEnabled() ? 'Reverse Agent' : 'Reverse Agent'
   const defaultEmail = isQwenReverseEnabled() ? 'noreply@reverse-agent.dev' : 'noreply@anthropic.com'
 
   const defaultAttribution = `🤖 Generated with [${appName}](${PRODUCT_URL})`
@@ -288,7 +288,7 @@ async function getTranscriptStats(): Promise<{
 /**
  * Get enhanced PR attribution text with Claude contribution stats.
  *
- * Format: "🤖 Generated with Claude Code (93% 3-shotted by claude-opus-4-5)"
+ * Format: "🤖 Generated with Reverse Agent (93% 3-shotted by claude-opus-4-5)"
  *
  * Rules:
  * - Shows Claude contribution percentage from commit attribution
@@ -329,7 +329,7 @@ export async function getEnhancedPRAttribution(
     return ''
   }
 
-  const appName = isQwenReverseEnabled() ? 'Reverse Agent' : 'Claude Code'
+  const appName = isQwenReverseEnabled() ? 'Reverse Agent' : 'Reverse Agent'
   const defaultAttribution = `🤖 Generated with [${appName}](${PRODUCT_URL})`
 
   // Get AppState first
