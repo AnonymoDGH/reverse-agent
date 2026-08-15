@@ -18,7 +18,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from qwen_reverse import create_chat, fetch_models, QwenError, QwenAuthError, QwenRateLimitError
 
-app = FastAPI(title="Qwen Reverse Claude-Code Bridge", version="1.0.0")
+app = FastAPI(title="Reverse Agent Bridge", version="2.0.0")
 
 
 def text_of(content: Any) -> str:

@@ -16,7 +16,7 @@ const bunCandidates = windows
 const bun = bunCandidates.find(existsSync);
 const port = new URL(process.env.QWEN_REVERSE_BASE_URL || 'http://127.0.0.1:8090').port || '8090';
 if (!existsSync(python)) {
-  console.error('Falta qwen-reverse. Ejecuta: npm start');
+  console.error('Falta el backend (qwen-reverse). Ejecuta: npm start');
   process.exit(1);
 }
 if (!bun) {
@@ -56,7 +56,7 @@ if (!(await healthy())) {
   }
   if (!(await healthy())) {
     server.kill();
-    throw new Error('El servidor qwen-reverse no inició en 20 segundos');
+    throw new Error('El servidor bridge (qwen-reverse) no inició en 20 segundos');
   }
 }
 

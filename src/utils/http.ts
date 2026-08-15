@@ -33,7 +33,7 @@ export function getUserAgent(): string {
   // so the read picks up the same setWorkload() value as getAttributionHeader.
   const workload = getWorkload()
   const workloadSuffix = workload ? `, workload/${workload}` : ''
-  const cliName = isQwenReverseEnabled() ? 'qwen-cli' : 'claude-cli'
+  const cliName = isQwenReverseEnabled() ? 'reverse-cli' : 'claude-cli'
   return `${cliName}/${MACRO.VERSION} (${process.env.USER_TYPE}, ${process.env.CLAUDE_CODE_ENTRYPOINT ?? 'cli'}${agentSdkVersion}${clientApp}${workloadSuffix})`
 }
 
@@ -49,7 +49,7 @@ export function getMCPUserAgent(): string {
     parts.push(`client-app/${process.env.CLAUDE_AGENT_SDK_CLIENT_APP}`)
   }
   const suffix = parts.length > 0 ? ` (${parts.join(', ')})` : ''
-  const codeName = isQwenReverseEnabled() ? 'qwen-code' : 'claude-code'
+  const codeName = isQwenReverseEnabled() ? 'reverse-agent' : 'claude-code'
   return `${codeName}/${MACRO.VERSION}${suffix}`
 }
 

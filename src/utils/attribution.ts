@@ -77,8 +77,8 @@ export function getAttributionTexts(): AttributionTexts {
       ? getPublicModelName(model)
       : defaultFallback
 
-  const appName = isQwenReverseEnabled() ? 'Qwen Code' : 'Claude Code'
-  const defaultEmail = isQwenReverseEnabled() ? 'noreply@qwen.ai' : 'noreply@anthropic.com'
+  const appName = isQwenReverseEnabled() ? 'Reverse Agent' : 'Claude Code'
+  const defaultEmail = isQwenReverseEnabled() ? 'noreply@reverse-agent.dev' : 'noreply@anthropic.com'
 
   const defaultAttribution = `🤖 Generated with [${appName}](${PRODUCT_URL})`
   const defaultCommit = `Co-Authored-By: ${modelName} <${defaultEmail}>`
@@ -329,7 +329,7 @@ export async function getEnhancedPRAttribution(
     return ''
   }
 
-  const appName = isQwenReverseEnabled() ? 'Qwen Code' : 'Claude Code'
+  const appName = isQwenReverseEnabled() ? 'Reverse Agent' : 'Claude Code'
   const defaultAttribution = `🤖 Generated with [${appName}](${PRODUCT_URL})`
 
   // Get AppState first
@@ -371,7 +371,7 @@ export async function getEnhancedPRAttribution(
     return defaultAttribution
   }
 
-  // Build the enhanced attribution: "🤖 Generated with Qwen Code (93% 3-shotted by qwen3.8-max, 2 memories recalled)"
+  // Build the enhanced attribution: "🤖 Generated with Reverse Agent (93% 3-shotted by qwen3.8-max, 2 memories recalled)"
   const memSuffix =
     memoryAccessCount > 0
       ? `, ${memoryAccessCount} ${memoryAccessCount === 1 ? 'memory' : 'memories'} recalled`

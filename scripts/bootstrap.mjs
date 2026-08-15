@@ -65,8 +65,8 @@ if (existsSync(python)) {
   qwenReady = check.status === 0;
 }
 if (!qwenReady) {
-  run(process.execPath, ['scripts/setup-qwen.mjs'], 'Preparando qwen-reverse');
+  run(process.execPath, ['scripts/setup-backend.mjs'], 'Preparando el backend (qwen-reverse)');
 }
 
 run(process.execPath, ['scripts/prepare-config.mjs'], 'Preparando la configuración local');
-run(process.execPath, ['scripts/qwen-run.mjs', ...process.argv.slice(2)], 'Abriendo Qwen Code');
+run(process.execPath, ['scripts/reverse-run.mjs', ...process.argv.slice(2)], 'Abriendo Reverse Agent');

@@ -6,5 +6,5 @@
  */
 
 export function getClaudeCodeUserAgent(): string {
-  return `qwen-code/${MACRO.VERSION}`
+  return `reverse-agent/${MACRO.VERSION}`
 }

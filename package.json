@@ -1,7 +1,7 @@
 {
-  "name": "qwen-code-full",
+  "name": "reverse-agent",
   "version": "1.0.0",
-  "description": "Reconstruction completa del CLI con backend qwen-reverse",
+  "description": "Reverse Agent — agente de programación multi-proveedor (backend principal: qwen-reverse)",
   "type": "module",
   "main": "src/entry.ts",
   "scripts": {
@@ -11,12 +11,12 @@
     "check": "bun x tsc --noEmit 2>&1 | head -100",
     "postinstall": "node scripts/postinstall.mjs",
     "config": "bun run config-ui/server.ts",
-    "setup:qwen": "node scripts/setup-qwen.mjs",
-    "qwen": "node scripts/qwen-run.mjs",
-    "qwen:print": "node scripts/qwen-run.mjs --print --output-format text",
-    "test:qwen-bridge": ".venv/bin/python -m unittest discover -s tests_python -p \"test_*.py\"",
+    "setup:backend": "node scripts/setup-backend.mjs",
+    "agent": "node scripts/reverse-run.mjs",
+    "agent:print": "node scripts/reverse-run.mjs --print --output-format text",
+    "test:bridge": ".venv/bin/python -m unittest discover -s tests_python -p \"test_*.py\"",
     "test:local": "node scripts/test-local.mjs",
-    "test": "npm run build && npm run test:qwen-bridge && npm run test:local",
+    "test": "npm run build && npm run test:bridge && npm run test:local",
     "start": "node scripts/bootstrap.mjs"
   },
   "dependencies": {
