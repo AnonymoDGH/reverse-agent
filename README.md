@@ -1,66 +1,94 @@
-# Reverse Agent
+<div align="center">
+
+<img src="docs/assets/hero.svg" alt="Reverse Agent" width="100%" />
+
+<br/>
 
 [![CI](https://github.com/AnonymoDGH/reverse-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/AnonymoDGH/reverse-agent/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-a78bfa.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.1.87-22d3ee.svg)](https://github.com/AnonymoDGH/reverse-agent)
+[![Providers](https://img.shields.io/badge/providers-5%2B-e879f9.svg)](#proveedores)
+[![Runtime](https://img.shields.io/badge/runtime-Bun%20%2B%20Node-67e8f9.svg)](#inicio-rápido)
 
-Agente de programación para la terminal, multi-proveedor y con identidad propia.
-Nació como una reconstrucción completa del CLI de Claude Code (más de 2.100
-archivos en `src/`), pero hoy es un producto distinto:
+**El agente de programación multi-proveedor para tu terminal.**
+Un solo comando: instala todo, arranca el bridge y abre la TUI.
 
-- **Marca propia:** Reverse Agent, paleta cian/violeta y la mascota *Wisp*.
-- **Backend principal:** [`qwen-reverse`](https://pypi.org/project/qwen-reverse/)
-  a través de un puente local Anthropic-compatible (`qwen_bridge.py`).
-- **Más proveedores:** OpenCode Zen, OpenRouter, Groq, DeepSeek y cualquier
-  endpoint OpenAI-compatible local (Ollama, LM Studio, vLLM).
-- **TUI completa:** herramientas, permisos, MCP, memoria, hooks, plugins,
-  tareas, sesiones, modo plan, subagentes y pantalla completa.
+[Inicio rápido](#inicio-rápido) · [Proveedores](#proveedores) · [Uso](#uso-diario) · [Arquitectura](#arquitectura)
 
-## Requisitos
+</div>
 
-- Node.js 20+
-- Python 3.10+
+---
 
-Bun se instala localmente como dependencia del proyecto.
+## ✨ ¿Qué es Reverse Agent?
 
-## Inicio automático — un solo comando
+Un agente de programación completo para la terminal con identidad propia.
+Nació como una reconstrucción del CLI de Claude Code (más de 2.100 archivos en
+`src/`), pero hoy es un producto distinto:
+
+| | |
+|---|---|
+| 🎨 **Marca propia** | Paleta cian/violeta/fucsia y la mascota *Wisp* |
+| 🔌 **Backend principal** | [`qwen-reverse`](https://pypi.org/project/qwen-reverse/) vía un puente local Anthropic-compatible |
+| 🌐 **Multi-proveedor** | OpenCode Zen, OpenRouter, Groq, DeepSeek y endpoints locales (Ollama, LM Studio, vLLM) |
+| 🛠️ **TUI completa** | Herramientas, permisos, MCP, memoria, hooks, plugins, sesiones, modo plan y subagentes |
+
+<div align="center">
+
+<img src="docs/assets/tui.svg" alt="Reverse Agent TUI" width="720" />
+
+*La TUI de Reverse Agent: bienvenida con Wisp, edición de archivos y ejecución de herramientas.*
+
+</div>
+
+---
+
+## 🚀 Inicio rápido
+
+**Requisitos:** Node.js 20+ · Python 3.10+ *(Bun se instala solo como dependencia)*
 
 ```bash
+git clone https://github.com/AnonymoDGH/reverse-agent.git
+cd reverse-agent
 npm start
 ```
 
-El comando instala dependencias, Bun y `qwen-reverse`, crea el entorno
-Python, inicia el bridge y abre la TUI. Consulta
-[`INICIO_RAPIDO.md`](INICIO_RAPIDO.md) para Windows, macOS y Linux.
+`npm start` lo hace todo: instala dependencias, Bun y `qwen-reverse`, crea el
+entorno Python, inicia el bridge y abre la TUI.
 
-## Uso después de la primera instalación
+> 💡 Si la instalación se interrumpe, no te preocupes: el arranque detecta y
+> repara automáticamente una instalación incompleta de Bun.
 
-Modo interactivo rápido:
+Consulta [`INICIO_RAPIDO.md`](INICIO_RAPIDO.md) para detalles de Windows, macOS y Linux.
+
+### Uso diario
 
 ```bash
+# Modo interactivo
 npm run agent
-```
 
-Una tarea y salida:
-
-```bash
+# Una tarea y salida
 npm run agent -- --print "revisa este proyecto y corrige los tests" \
   --output-format text --bare --dangerously-skip-permissions
 ```
 
-## Proveedores
+---
 
-El bridge (`qwen_bridge.py`) expone `/v1/messages` en formato Anthropic y
-rutea cada request al proveedor según el prefijo del modelo:
+## 🌐 Proveedores
 
-| Prefijo        | Proveedor            | Activación                                  |
-| -------------- | -------------------- | ------------------------------------------- |
-| *(ninguno)*    | qwen-reverse (web)   | siempre activo (backend principal)          |
-| `opencode/`    | OpenCode Zen         | `ZEN_API_KEY` (o key local de opencode)     |
-| `openrouter/`  | OpenRouter           | `OPENROUTER_API_KEY`                        |
-| `groq/`        | Groq                 | `GROQ_API_KEY`                              |
-| `deepseek/`    | DeepSeek             | `DEEPSEEK_API_KEY`                          |
-| `local/`       | OpenAI-compatible    | `OPENAI_COMPATIBLE_BASE_URL` (Ollama, etc.) |
+El bridge (`qwen_bridge.py`) expone `/v1/messages` en formato Anthropic y rutea
+cada request al proveedor según el **prefijo del modelo**:
 
-Ejemplos:
+| Prefijo | Proveedor | Activación |
+| :--- | :--- | :--- |
+| *(ninguno)* | ⭐ **qwen-reverse** (principal) | siempre activo |
+| `opencode/` | OpenCode Zen | `ZEN_API_KEY` (o key local de opencode) |
+| `openrouter/` | OpenRouter | `OPENROUTER_API_KEY` |
+| `groq/` | Groq | `GROQ_API_KEY` |
+| `deepseek/` | DeepSeek | `DEEPSEEK_API_KEY` |
+| `local/` | OpenAI-compatible | `OPENAI_COMPATIBLE_BASE_URL` (Ollama, etc.) |
+
+<details>
+<summary><b>📋 Ejemplos por proveedor</b></summary>
 
 ```bash
 # Qwen (por defecto)
@@ -79,15 +107,33 @@ DEEPSEEK_API_KEY=sk-... QWEN_MODEL=deepseek/deepseek-reasoner npm run agent
 OPENAI_COMPATIBLE_BASE_URL=http://localhost:11434/v1 QWEN_MODEL=local/llama3.1 npm run agent
 ```
 
-También puedes cambiar de modelo dentro de la TUI con `/model`: el picker
-lista los modelos Qwen y los de cada proveedor configurado. El comando
-`/providers` muestra el estado de cada proveedor (activo, prefijo y modelos
-destacados).
+</details>
 
-Cualquier modelo pedido sin prefijo que no sea Qwen se envía al primer
-proveedor configurado; si no hay ninguno, se usa qwen-reverse.
+Dentro de la TUI:
 
-## Configuración
+- `/model` — cambia de modelo; el picker lista Qwen y los proveedores configurados
+- `/providers` — estado de cada proveedor (activo, prefijo y modelos destacados)
+
+Cualquier modelo sin prefijo que no sea Qwen se envía al primer proveedor
+configurado; si no hay ninguno, se usa qwen-reverse.
+
+---
+
+## 🏗️ Arquitectura
+
+<div align="center">
+
+<img src="docs/assets/architecture.svg" alt="Arquitectura de Reverse Agent" width="760" />
+
+</div>
+
+```
+CLI TypeScript (Bun) ──/v1/messages──▶ qwen_bridge.py (FastAPI) ──▶ proveedor
+```
+
+---
+
+## ⚙️ Configuración
 
 ```env
 QWEN_REVERSE=1
@@ -97,29 +143,48 @@ QWEN_TOKEN=
 ```
 
 `QWEN_TOKEN` es opcional; `qwen-reverse` admite funcionamiento anónimo.
-El resto de variables de proveedores está en `.env.example`.
+El resto de variables de proveedores está en [`.env.example`](.env.example).
 
-## Compilación y pruebas
+---
+
+## 🧪 Compilación y pruebas
 
 ```bash
-npm run build
-npm run test:bridge
+npm run build        # genera dist/entry.js + sourcemap
+npm run test:bridge  # 30 tests del puente Python
+npm run test:local   # checks de integración local
 ```
 
-La compilación genera `dist/entry.js` y su mapa de fuentes. El flujo completo
-verificado: CLI TypeScript → puente Anthropic → proveedor → llamada de
-herramienta → escritura local → respuesta final.
+Flujo completo verificado: CLI TypeScript → puente Anthropic → proveedor →
+llamada de herramienta → escritura local → respuesta final.
 
-## Identidad visual
+---
 
-- Paleta de marca: cian (`#22d3ee`) + violeta (`#a78bfa`) + fucsia para bordes de shell.
-- Mascota: **Wisp**, un fantasma del espacio profundo (reemplaza al clon del
-  logo original en bienvenida, logo condensado y animaciones).
-- Seis temas recalculados: dark, light, dark/light daltonizados y dark/light ANSI.
+## 🎨 Identidad visual
 
-## Aviso
+<div align="center">
+
+<img src="docs/assets/wisp.svg" alt="Wisp, la mascota de Reverse Agent" width="160" />
+
+</div>
+
+- **Paleta de marca:** cian `#22d3ee` + violeta `#a78bfa` + fucsia `#e879f9`
+- **Mascota:** *Wisp*, un fantasma del espacio profundo que viaja "al revés" por tu código
+- **Seis temas:** dark, light, dark/light daltonizados y dark/light ANSI
+
+---
+
+## ⚠️ Aviso
 
 `qwen-reverse` utiliza endpoints web no oficiales de Qwen. Puede dejar de
 funcionar si el servicio cambia y puede estar sujeto a límites o bloqueos.
 Úsalo conforme a los términos aplicables. Los proveedores de API requieren sus
 propias claves y términos.
+
+---
+
+<div align="center">
+
+Hecho con 💜 · [Licencia MIT](LICENSE)
+
+</div>
