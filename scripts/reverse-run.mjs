@@ -30,6 +30,10 @@ const env = {
   ANTHROPIC_BASE_URL: process.env.QWEN_REVERSE_BASE_URL || `http://127.0.0.1:${port}`,
   ANTHROPIC_API_KEY: 'qwen-reverse',
   QWEN_MODEL: process.env.QWEN_MODEL || 'qwen3.8-max-thinking',
+  // Fijar también ANTHROPIC_MODEL para que un valor global heredado
+  // (p. ej. claude-opus-4-6) no se cuele y rutee la petición a otro
+  // proveedor. El backend principal es qwen-reverse.
+  ANTHROPIC_MODEL: process.env.QWEN_MODEL || 'qwen3.8-max-thinking',
   CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
   CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS: '1',
   ENABLE_TOOL_SEARCH: 'false',
