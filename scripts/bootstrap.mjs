@@ -2,21 +2,15 @@
 import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
+import { findBun, bunNeedsRepair, repairBun } from './find-bun.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const windows = process.platform === 'win32';
 const python = path.join(root, '.venv', windows ? 'Scripts/python.exe' : 'bin/python');
 
-function bunCandidates() {
-  return windows
-    ? [
-        path.join(root, 'node_modules', 'bun', 'bin', 'bun.exe'),
-        path.join(root, 'node_modules', '.bin', 'bun.exe'),
-        path.join(root, 'node_modules', '.bin', 'bun.cmd'),
-      ]
-    : [path.join(root, 'node_modules', '.bin', 'bun')];
-}
-function hasBun() { return bunCandidates().some(existsSync); }
+// hasBun usa findBun, que descarta el placeholder roto de una instalación
+// interrumpida y busca el binario real (local, @oven o PATH).
+function hasBun() { return findBun(root) !== null; }
 
 const major = Number(process.versions.node.split('.')[0]);
 if (major < 20) {
@@ -39,7 +33,10 @@ function run(command, args, label, options = {}) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
-if (!hasBun()) {
+// La decisión de instalar se basa en el paquete bun LOCAL (no en un bun
+// global del PATH): si node_modules/bun no existe faltan todas las deps.
+const localBunPackage = path.join(root, 'node_modules', 'bun', 'package.json');
+if (!existsSync(localBunPackage)) {
   // En Windows, spawnSync('npm.cmd', ...) puede fallar con EINVAL. npm start
   // expone la ruta real de npm-cli.js en npm_execpath; ejecutarla con Node
   // evita por completo los shims .cmd y funciona igual en las tres plataformas.
@@ -54,6 +51,10 @@ if (!hasBun()) {
   }
 }
 
+// Si la instalación quedó a medias y dejó el placeholder, reparar ahora.
+if (bunNeedsRepair(root)) {
+  repairBun(root);
+}
 if (!hasBun()) {
   console.error('npm terminó, pero no se encontró el ejecutable de Bun. Borra node_modules y vuelve a ejecutar npm start.');
   process.exit(1);

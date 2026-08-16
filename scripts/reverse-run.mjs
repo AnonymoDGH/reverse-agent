@@ -2,27 +2,26 @@
 import { existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
+import { findBun, bunNeedsRepair, repairBun } from './find-bun.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const windows = process.platform === 'win32';
 const python = path.join(root, '.venv', windows ? 'Scripts/python.exe' : 'bin/python');
-const bunCandidates = windows
-  ? [
-      path.join(root, 'node_modules', 'bun', 'bin', 'bun.exe'),
-      path.join(root, 'node_modules', '.bin', 'bun.exe'),
-      path.join(root, 'node_modules', '.bin', 'bun.cmd'),
-    ]
-  : [path.join(root, 'node_modules', '.bin', 'bun')];
-const bun = bunCandidates.find(existsSync);
 const port = new URL(process.env.QWEN_REVERSE_BASE_URL || 'http://127.0.0.1:8090').port || '8090';
 if (!existsSync(python)) {
   console.error('Falta el backend (qwen-reverse). Ejecuta: npm start');
   process.exit(1);
 }
-if (!bun) {
+// Si una instalación interrumpida dejó el placeholder de bun, repararla.
+if (bunNeedsRepair(root)) {
+  repairBun(root);
+}
+const bunFound = findBun(root);
+if (!bunFound) {
   console.error('Falta Bun. Ejecuta: npm start');
   process.exit(1);
 }
+const bun = bunFound.path;
 
 const env = {
   ...process.env,
@@ -62,7 +61,7 @@ if (!(await healthy())) {
 
 const args = process.argv.slice(2);
 // Si npm creó únicamente bun.cmd, debe ejecutarse a través de cmd.exe.
-const bunIsCmd = windows && bun.toLowerCase().endsWith('.cmd');
+const bunIsCmd = bunFound.isCmd;
 const command = bunIsCmd ? (process.env.ComSpec || 'C:\\Windows\\System32\\cmd.exe') : bun;
 const commandArgs = bunIsCmd
   ? ['/d', '/s', '/c', `"${bun}" run src/entry.ts ${args.map(arg => `"${arg.replaceAll('"', '\\"')}"`).join(' ')}`]
