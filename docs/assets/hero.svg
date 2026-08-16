@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" width="1280" height="480">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0620"/>
+      <stop offset="45%" stop-color="#120a33"/>
+      <stop offset="100%" stop-color="#1a0b3d"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#e879f9"/>
+    </linearGradient>
+    <linearGradient id="wispBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="55%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="wispRim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#e879f9"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.30"/>
+      <stop offset="60%" stop-color="#a78bfa" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebula1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebula2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0891b2" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#0891b2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- fondo -->
+  <rect width="1280" height="480" fill="url(#bg)"/>
+
+  <!-- nebulosas -->
+  <ellipse cx="1050" cy="120" rx="320" ry="200" fill="url(#nebula1)"/>
+  <ellipse cx="220" cy="400" rx="300" ry="180" fill="url(#nebula2)"/>
+
+  <!-- campo de estrellas -->
+  <g fill="#e0f2fe">
+    <circle cx="90" cy="70" r="1.6" opacity="0.9"/>
+    <circle cx="180" cy="150" r="1.2" opacity="0.6"/>
+    <circle cx="300" cy="60" r="1.8" opacity="0.8"/>
+    <circle cx="420" cy="120" r="1.1" opacity="0.5"/>
+    <circle cx="520" cy="50" r="1.5" opacity="0.7"/>
+    <circle cx="640" cy="90" r="1.2" opacity="0.6"/>
+    <circle cx="760" cy="40" r="1.7" opacity="0.8"/>
+    <circle cx="880" cy="110" r="1.3" opacity="0.6"/>
+    <circle cx="1000" cy="60" r="1.6" opacity="0.7"/>
+    <circle cx="1120" cy="140" r="1.2" opacity="0.5"/>
+    <circle cx="1200" cy="80" r="1.8" opacity="0.8"/>
+    <circle cx="140" cy="300" r="1.3" opacity="0.5"/>
+    <circle cx="60" cy="200" r="1.5" opacity="0.6"/>
+    <circle cx="1230" cy="260" r="1.4" opacity="0.6"/>
+    <circle cx="1160" cy="380" r="1.6" opacity="0.5"/>
+    <circle cx="360" cy="420" r="1.2" opacity="0.4"/>
+    <circle cx="700" cy="430" r="1.4" opacity="0.4"/>
+    <circle cx="940" cy="410" r="1.2" opacity="0.4"/>
+  </g>
+  <g stroke="#c4b5fd" stroke-width="1.6" stroke-linecap="round" opacity="0.9">
+    <path d="M 250 210 v 14 M 243 217 h 14"/>
+    <path d="M 1080 200 v 12 M 1074 206 h 12"/>
+    <path d="M 560 160 v 10 M 555 165 h 10"/>
+  </g>
+
+  <!-- halo detrás de Wisp -->
+  <circle cx="1010" cy="250" r="180" fill="url(#glow)"/>
+
+  <!-- Wisp -->
+  <g transform="translate(920,150)">
+    <path d="M 20 70
+             C 20 24, 44 6, 90 6
+             C 136 6, 160 24, 160 70
+             L 160 150
+             Q 146 168, 132 150
+             Q 118 168, 104 150
+             Q 90 168, 76 150
+             Q 62 168, 48 150
+             Q 34 168, 20 150
+             Z"
+          fill="url(#wispBody)"/>
+    <path d="M 20 70 C 20 24, 44 6, 90 6 C 136 6, 160 24, 160 70"
+          fill="none" stroke="url(#wispRim)" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+    <ellipse cx="66" cy="34" rx="22" ry="13" fill="#c4b5fd" opacity="0.35"/>
+    <rect x="52" y="52" width="14" height="26" rx="7" fill="#181432"/>
+    <rect x="114" y="52" width="14" height="26" rx="7" fill="#181432"/>
+    <circle cx="57" cy="59" r="2.6" fill="#67e8f9" opacity="0.9"/>
+    <circle cx="119" cy="59" r="2.6" fill="#67e8f9" opacity="0.9"/>
+    <ellipse cx="46" cy="90" rx="6" ry="3.5" fill="#e879f9" opacity="0.45"/>
+    <ellipse cx="134" cy="90" rx="6" ry="3.5" fill="#e879f9" opacity="0.45"/>
+  </g>
+
+  <!-- título -->
+  <text x="80" y="210" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="86" font-weight="800" fill="url(#title)" letter-spacing="2">REVERSE AGENT</text>
+
+  <!-- subtítulo -->
+  <text x="84" y="262" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="26" fill="#c4b5fd" letter-spacing="1">El agente de programación multi-proveedor para tu terminal</text>
+
+  <!-- línea de comando estilo terminal -->
+  <g transform="translate(84,300)">
+    <rect x="0" y="0" width="560" height="54" rx="10" fill="#0f0a26" stroke="#7c3aed" stroke-opacity="0.5" stroke-width="1.5"/>
+    <circle cx="24" cy="27" r="6" fill="#e879f9"/>
+    <circle cx="44" cy="27" r="6" fill="#a78bfa"/>
+    <circle cx="64" cy="27" r="6" fill="#22d3ee"/>
+    <text x="88" y="34" font-family="'Cascadia Code', 'Fira Code', Consolas, monospace" font-size="20" fill="#67e8f9">$</text>
+    <text x="108" y="34" font-family="'Cascadia Code', 'Fira Code', Consolas, monospace" font-size="20" fill="#e0f2fe">npm start</text>
+    <rect x="222" y="16" width="11" height="24" fill="#22d3ee" opacity="0.85"/>
+  </g>
+
+  <!-- chips de proveedores -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="600">
+    <g transform="translate(84,384)">
+      <rect width="120" height="34" rx="17" fill="#164e63" opacity="0.85"/>
+      <text x="60" y="22" text-anchor="middle" fill="#67e8f9">qwen-reverse</text>
+    </g>
+    <g transform="translate(216,384)">
+      <rect width="110" height="34" rx="17" fill="#3b0764" opacity="0.85"/>
+      <text x="55" y="22" text-anchor="middle" fill="#c4b5fd">OpenRouter</text>
+    </g>
+    <g transform="translate(338,384)">
+      <rect width="80" height="34" rx="17" fill="#4a044e" opacity="0.85"/>
+      <text x="40" y="22" text-anchor="middle" fill="#f0abfc">Groq</text>
+    </g>
+    <g transform="translate(430,384)">
+      <rect width="100" height="34" rx="17" fill="#1e1b4b" opacity="0.85"/>
+      <text x="50" y="22" text-anchor="middle" fill="#a5b4fc">DeepSeek</text>
+    </g>
+    <g transform="translate(542,384)">
+      <rect width="90" height="34" rx="17" fill="#0c4a6e" opacity="0.85"/>
+      <text x="45" y="22" text-anchor="middle" fill="#7dd3fc">Local</text>
+    </g>
+  </g>
+</svg>

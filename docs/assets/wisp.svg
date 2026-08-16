@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 260" width="240" height="260">
+  <defs>
+    <linearGradient id="wispBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="55%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+    <radialGradient id="wispGlow" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#a78bfa" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wispRim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#e879f9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- halo -->
+  <circle cx="120" cy="118" r="112" fill="url(#wispGlow)"/>
+
+  <!-- estrellitas -->
+  <g fill="#67e8f9">
+    <circle cx="28" cy="40" r="2" opacity="0.8"/>
+    <circle cx="208" cy="66" r="1.6" opacity="0.7"/>
+    <circle cx="196" cy="196" r="2" opacity="0.5"/>
+    <circle cx="36" cy="188" r="1.4" opacity="0.6"/>
+  </g>
+  <g stroke="#c4b5fd" stroke-width="1.4" stroke-linecap="round" opacity="0.85">
+    <path d="M 206 26 v 12 M 200 32 h 12"/>
+    <path d="M 30 96 v 9 M 25.5 100.5 h 9"/>
+  </g>
+
+  <!-- cuerpo del fantasma -->
+  <path d="M 60 105
+           C 60 52, 84 30, 120 30
+           C 156 30, 180 52, 180 105
+           L 180 196
+           Q 165 216, 150 196
+           Q 135 216, 120 196
+           Q 105 216, 90 196
+           Q 75 216, 60 196
+           Z"
+        fill="url(#wispBody)"/>
+
+  <!-- luz de borde cian/fucsia -->
+  <path d="M 60 105
+           C 60 52, 84 30, 120 30
+           C 156 30, 180 52, 180 105"
+        fill="none" stroke="url(#wispRim)" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- brillo superior -->
+  <ellipse cx="98" cy="62" rx="26" ry="16" fill="#c4b5fd" opacity="0.35"/>
+
+  <!-- ojos (huecos color espacio profundo) -->
+  <rect x="92" y="84" width="16" height="30" rx="8" fill="#181432"/>
+  <rect x="132" y="84" width="16" height="30" rx="8" fill="#181432"/>
+
+  <!-- destellos en los ojos -->
+  <circle cx="98" cy="92" r="3" fill="#67e8f9" opacity="0.9"/>
+  <circle cx="138" cy="92" r="3" fill="#67e8f9" opacity="0.9"/>
+
+  <!-- mejillas -->
+  <ellipse cx="86" cy="126" rx="7" ry="4" fill="#e879f9" opacity="0.45"/>
+  <ellipse cx="154" cy="126" rx="7" ry="4" fill="#e879f9" opacity="0.45"/>
+</svg>

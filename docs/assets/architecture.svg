@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340">
+  <defs>
+    <linearGradient id="nodeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#120a33"/>
+    </linearGradient>
+    <linearGradient id="bridgeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#164e63"/>
+      <stop offset="100%" stop-color="#0e3a4a"/>
+    </linearGradient>
+    <linearGradient id="arrow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="340" fill="#0b0620" rx="12"/>
+
+  <!-- TUI -->
+  <g>
+    <rect x="40" y="120" width="180" height="100" rx="12" fill="url(#nodeGrad)" stroke="#a78bfa" stroke-opacity="0.6" stroke-width="1.5"/>
+    <text x="130" y="160" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="700" fill="#c4b5fd">Reverse Agent</text>
+    <text x="130" y="186" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#8b85a8">TUI · TypeScript</text>
+  </g>
+
+  <!-- flecha TUI -> bridge -->
+  <line x1="220" y1="170" x2="330" y2="170" stroke="url(#arrow)" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+  <text x="275" y="158" text-anchor="middle" font-family="'Cascadia Code', monospace" font-size="11" fill="#67e8f9">/v1/messages</text>
+
+  <!-- Bridge -->
+  <g>
+    <rect x="330" y="110" width="200" height="120" rx="12" fill="url(#bridgeGrad)" stroke="#22d3ee" stroke-opacity="0.6" stroke-width="1.5"/>
+    <text x="430" y="150" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="700" fill="#67e8f9">qwen_bridge.py</text>
+    <text x="430" y="174" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#8b85a8">FastAPI · Anthropic-compatible</text>
+    <text x="430" y="196" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#8b85a8">ruteo por prefijo</text>
+  </g>
+
+  <!-- flechas bridge -> proveedores -->
+  <g stroke="url(#arrow)" stroke-width="2" fill="none" marker-end="url(#arrowHead)">
+    <path d="M 530 140 C 600 140, 620 60, 690 60"/>
+    <path d="M 530 158 C 600 158, 620 115, 690 115"/>
+    <path d="M 530 176 C 600 176, 620 170, 690 170"/>
+    <path d="M 530 194 C 600 194, 620 225, 690 225"/>
+    <path d="M 530 212 C 600 212, 620 280, 690 280"/>
+  </g>
+
+  <!-- proveedores -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="600">
+    <g>
+      <rect x="690" y="40" width="170" height="40" rx="10" fill="#164e63" stroke="#22d3ee" stroke-opacity="0.5"/>
+      <text x="775" y="65" text-anchor="middle" fill="#67e8f9">qwen-reverse ★</text>
+    </g>
+    <g>
+      <rect x="690" y="95" width="170" height="40" rx="10" fill="#3b0764" stroke="#a78bfa" stroke-opacity="0.5"/>
+      <text x="775" y="120" text-anchor="middle" fill="#c4b5fd">OpenCode Zen</text>
+    </g>
+    <g>
+      <rect x="690" y="150" width="170" height="40" rx="10" fill="#3b0764" stroke="#a78bfa" stroke-opacity="0.5"/>
+      <text x="775" y="175" text-anchor="middle" fill="#c4b5fd">OpenRouter</text>
+    </g>
+    <g>
+      <rect x="690" y="205" width="170" height="40" rx="10" fill="#4a044e" stroke="#e879f9" stroke-opacity="0.5"/>
+      <text x="775" y="230" text-anchor="middle" fill="#f0abfc">Groq</text>
+    </g>
+    <g>
+      <rect x="690" y="260" width="170" height="40" rx="10" fill="#1e1b4b" stroke="#a5b4fc" stroke-opacity="0.5"/>
+      <text x="775" y="285" text-anchor="middle" fill="#a5b4fc">DeepSeek · Local</text>
+    </g>
+  </g>
+
+  <text x="775" y="322" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#8b85a8">★ backend principal</text>
+</svg>
